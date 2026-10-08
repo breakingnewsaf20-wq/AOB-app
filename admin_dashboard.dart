@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+class AdminDashboard extends StatelessWidget { const AdminDashboard({super.key}); @override Widget build(BuildContext c)=>Scaffold(appBar:AppBar(title:const Text('Admin Panel')),body:ListView(padding:const EdgeInsets.all(16),children:[const Text('Management',style:TextStyle(fontSize:24,fontWeight:FontWeight.bold)),const SizedBox(height:12),_Count(title:'Users',query:FirebaseFirestore.instance.collection('users')), _Count(title:'Products',query:FirebaseFirestore.instance.collection('products')), _Count(title:'Orders',query:FirebaseFirestore.instance.collection('orders'))])); }
+class _Count extends StatelessWidget{final String title;final Query<Map<String,dynamic>> query;const _Count({required this.title,required this.query});@override Widget build(BuildContext c)=>Card(child:ListTile(title:Text(title),trailing:StreamBuilder<QuerySnapshot>(stream:query.snapshots(),builder:(c,s)=>Text('${s.data?.docs.length??0}'))));}
+}

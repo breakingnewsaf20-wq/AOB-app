@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "433687621955",
+    "project_id": "afghanonllinebazaar",
+    "storage_bucket": "afghanonllinebazaar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:433687621955:android:ec80cd9b2f42ae051c7ff6",
+        "android_client_info": {
+          "package_name": "com.afghanonlinebazaar.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsiuJf2LHVblIxdzU8pfuE_h_nFvN-fo4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:433687621955:android:7143fb4133b95c781c7ff6",
+        "android_client_info": {
+          "package_name": "com.aob.afghanonlinebazaar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsiuJf2LHVblIxdzU8pfuE_h_nFvN-fo4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

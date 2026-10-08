@@ -16,9 +16,7 @@ dependencies:
   firebase_messaging: ^16.0.3
   image_picker: ^1.2.0
   intl: ^0.20.2
-  http: ^1.5.2
   uuid: ^4.5.1
-  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

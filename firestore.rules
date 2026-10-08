@@ -2,56 +2,30 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function isAdmin() {
-      return signedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
-
+    function isAdmin() { return signedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; }
     match /users/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow create: if isOwner(uid) && request.resource.data.role in ['customer', 'seller'];
-      allow update: if isAdmin() || (isOwner(uid) && request.resource.data.role == resource.data.role);
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow delete: if isAdmin();
-      match /favorites/{productId} { allow read, write: if isOwner(uid); }
-      match /cart/{productId} { allow read, write: if isOwner(uid); }
     }
-
     match /products/{productId} {
       allow read: if resource.data.approved == true || (signedIn() && resource.data.sellerId == request.auth.uid) || isAdmin();
-      allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid && request.resource.data.approved == false;
-      allow update: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid && request.resource.data.sellerId == resource.data.sellerId);
-      allow delete: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if signedIn() && (resource.data.sellerId == request.auth.uid || isAdmin());
     }
-
-    match /seller_profiles/{uid} {
-      allow read: if true;
-      allow create, update: if isOwner(uid) || isAdmin();
-      allow delete: if isAdmin() || isOwner(uid);
-    }
-
+    match /seller_profiles/{uid} { allow read: if true; allow write: if signedIn() && (request.auth.uid == uid || isAdmin()); }
     match /categories/{id} { allow read: if true; allow write: if isAdmin(); }
-
     match /orders/{id} {
-      allow create: if signedIn()
-        && request.resource.data.customerId == request.auth.uid
-        && request.resource.data.status == 'Pending';
+      allow create: if signedIn() && request.resource.data.customerId == request.auth.uid;
       allow read: if signedIn() && (resource.data.customerId == request.auth.uid || isAdmin());
-      allow update: if isAdmin();
+      allow update: if isAdmin() || (signedIn() && resource.data.sellerId == request.auth.uid);
       allow delete: if isAdmin();
     }
-
-    match /notifications/{id} {
-      allow read: if signedIn() && resource.data.userId == request.auth.uid;
-      allow write: if isAdmin();
-    }
-
-    match /reports/{id} {
-      allow create: if signedIn() && request.resource.data.reporterId == request.auth.uid;
-      allow read, update, delete: if isAdmin();
-    }
-
-    match /chats/{chatId}/messages/{messageId} {
-      allow read, write: if signedIn();
-    }
+    match /notifications/{id} { allow read: if signedIn() && resource.data.userId == request.auth.uid; allow write: if isAdmin(); }
+    match /reports/{id} { allow create: if signedIn(); allow read, update, delete: if isAdmin(); }
+    match /users/{uid}/favorites/{productId} { allow read, write: if signedIn() && request.auth.uid == uid; }
+    match /users/{uid}/cart/{productId} { allow read, write: if signedIn() && request.auth.uid == uid; }
+    match /chats/{chatId}/messages/{messageId} { allow read, write: if signedIn(); }
   }
 }
