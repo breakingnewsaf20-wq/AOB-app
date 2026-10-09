@@ -12,15 +12,15 @@ class SellerDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final strings = LanguageScope.of(context);
+    final s = LanguageScope.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(strings.tr('sellerDashboard')),
+        title: Text(s.tr('sellerDashboard')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog<void>(
+          showDialog(
             context: context,
             builder: (_) => const AddProductDialog(),
           );
@@ -36,18 +36,16 @@ class SellerDashboard extends StatelessWidget {
             );
           }
 
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          final products = snapshot.data!;
+          final products = snapshot.data ?? [];
 
           if (products.isEmpty) {
-            return Center(
-              child: Text(strings.tr('noProducts')),
-            );
+            return Center(child: Text(s.tr('noProducts')));
           }
 
           return ListView.builder(
@@ -62,8 +60,8 @@ class SellerDashboard extends StatelessWidget {
                 ),
                 trailing: Text(
                   product.approved
-                      ? strings.tr('approved')
-                      : strings.tr('pending'),
+                      ? s.tr('approved')
+                      : s.tr('pending'),
                 ),
               );
             },
@@ -89,28 +87,36 @@ class _AddProductDialogState extends State<AddProductDialog> {
   final cityController = TextEditingController();
   final categoryController = TextEditingController();
 
-  final picker = ImagePicker();
-  final imageService = ImageService();
+  final ImagePicker picker = ImagePicker();
+  final ImageService imageService = ImageService();
 
   final List<XFile> selectedImages = [];
+
   bool loading = false;
 
-  Future<void> pickImages() async {
-    final files = await picker.pickMultiImage(imageQuality: 85);
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    priceController.dispose();
+    stockController.dispose();
+    cityController.dispose();
+    categoryController.dispose();
+    super.dispose();
+  }
 
-    if (!mounted || files.isEmpty) return;
+  Future<void> pickImages() async {
+    final images = await picker.pickMultiImage(imageQuality: 85);
+
+    if (!mounted || images.isEmpty) return;
 
     setState(() {
-      selectedImages.addAll(files);
+      selectedImages.addAll(images);
     });
   }
 
   Future<void> saveProduct() async {
-    if (loading) return;
-
-    setState(() {
-      loading = true;
-    });
+    setState(() => loading = true);
 
     try {
       final imageUrls = <String>[];
@@ -132,42 +138,27 @@ class _AddProductDialogState extends State<AddProductDialog> {
       );
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.pop(context);
       }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-          ),
+          SnackBar(content: Text(error.toString())),
         );
       }
     } finally {
       if (mounted) {
-        setState(() {
-          loading = false;
-        });
+        setState(() => loading = false);
       }
     }
   }
 
   @override
-  void dispose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    priceController.dispose();
-    stockController.dispose();
-    cityController.dispose();
-    categoryController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final strings = LanguageScope.of(context);
+    final s = LanguageScope.of(context);
 
     return AlertDialog(
-      title: Text(strings.tr('newProduct')),
+      title: Text(s.tr('newProduct')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -175,69 +166,28 @@ class _AddProductDialogState extends State<AddProductDialog> {
             TextField(
               controller: titleController,
               decoration: InputDecoration(
-                labelText: strings.tr('productName'),
+                labelText: s.tr('productName'),
               ),
             ),
             TextField(
               controller: descriptionController,
               decoration: InputDecoration(
-                labelText: strings.tr('description'),
+                labelText: s.tr('description'),
               ),
             ),
             TextField(
               controller: priceController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: '${strings.tr('price')} AFN',
+                labelText: '${s.tr('price')} AFN',
               ),
             ),
             TextField(
               controller: stockController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: strings.tr('stock'),
+                labelText: s.tr('stock'),
               ),
             ),
             TextField(
-              controller: cityController,
-              decoration: InputDecoration(
-                labelText: strings.tr('city'),
-              ),
-            ),
-            TextField(
-              controller: categoryController,
-              decoration: InputDecoration(
-                labelText: strings.tr('category'),
-              ),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: loading ? null : pickImages,
-              icon: const Icon(Icons.photo_library),
-              label: Text(
-                '${strings.tr('imageUpload')} '
-                '(${selectedImages.length})',
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: loading
-              ? null
-              : () => Navigator.of(context).pop(),
-          child: Text(strings.tr('cancel')),
-        ),
-        FilledButton(
-          onPressed: loading ? null : saveProduct,
-          child: Text(
-            loading
-                ? strings.tr('pleaseWait')
-                : strings.tr('save'),
-          ),
-        ),
-      ],
-    );
-  }
-}
+             
