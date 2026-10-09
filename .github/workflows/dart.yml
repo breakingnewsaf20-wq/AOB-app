@@ -1,0 +1,42 @@
+name: Build Afghan Online Bazaar APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Check project files
+        run: |
+          test -s pubspec.yaml || { echo "ERROR: pubspec.yaml is missing or empty"; exit 1; }
+          test -f android/gradlew || { echo "ERROR: Android Gradle wrapper is missing"; exit 1; }
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Afghan-Online-Bazaar-APK
+          path: build/app/outputs/flutter-apk/app-debug.apk
